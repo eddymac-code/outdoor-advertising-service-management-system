@@ -71,9 +71,21 @@ $update = protect(function ($id) {
     $this->dispatch('pg:eventRefresh-assetTable');
 });
 
-on(['show-success-message' => function ($message) {
-    session()->flash('success', $message);
-}]);
+on([
+    'show-success-message' => function ($message) {
+        session()->flash('success', $message);
+    },
+
+    'delete-asset' => function ($assetId) {
+        $asset = Asset::findOrFail($assetId);
+
+        $asset->delete();
+
+        $this->dispatch('pg:eventRefresh-assetTable');
+
+        $this->dispatch('show-success-message', 'Asset Deleted');
+    }
+]);
 ?>
 
 <div>

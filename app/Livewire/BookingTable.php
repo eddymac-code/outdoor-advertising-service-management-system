@@ -4,12 +4,13 @@ namespace App\Livewire;
 
 use App\Models\Booking;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Database\Eloquent\Builder;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
 use PowerComponents\LivewirePowerGrid\Facades\Filter;
-use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
+use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 
 final class BookingTable extends PowerGridComponent
@@ -44,11 +45,35 @@ final class BookingTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('id')
             ->add('client_id')
+            ->add('client_id_formatted', fn (Booking $model) => $model->client->name)
             ->add('asset_id')
+            ->add('asset_id_formatted', fn (Booking $model) => $model->asset->name)
             ->add('start_date_formatted', fn (Booking $model) => Carbon::parse($model->start_date)->format('d/m/Y'))
             ->add('end_date_formatted', fn (Booking $model) => Carbon::parse($model->end_date)->format('d/m/Y'))
             ->add('total_price')
             ->add('status')
+            ->add('status_formatted', function ($entry) {
+                if ($entry->status === 'pending') {
+                    $stat = Blade::render(<<<blade
+                                <x-badge amber label="Pending" />
+                            blade);
+                } elseif ($entry->status === 'confirmed') {
+                    $stat = Blade::render(<<<blade
+                                <x-badge fuchsia label="Confirmed" />
+                            blade);
+                } elseif ($entry->status === 'completed') {
+                    $stat = Blade::render(<<<blade
+                                <x-badge emerald label="Completed" />
+                            blade);
+                } else {
+                    $stat = Blade::render(<<<blade
+                                <x-badge negative label="Cancelled" />
+                            blade);
+                }
+
+                return $stat;
+                
+            })
             ->add('created_at');
     }
 
@@ -56,8 +81,8 @@ final class BookingTable extends PowerGridComponent
     {
         return [
             Column::make('Id', 'id'),
-            Column::make('Client id', 'client_id'),
-            Column::make('Asset id', 'asset_id'),
+            Column::make('Client', 'client_id_formatted', 'client_id'),
+            Column::make('Asset', 'asset_id_formatted', 'asset_id'),
             Column::make('Start date', 'start_date_formatted', 'start_date')
                 ->sortable(),
 
@@ -68,12 +93,12 @@ final class BookingTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Status', 'status')
+            Column::make('Status', 'status_formatted' ,'status')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Created at', 'created_at_formatted', 'created_at')
-                ->sortable(),
+            // Column::make('Created at', 'created_at_formatted', 'created_at')
+            //     ->sortable(),
 
             Column::make('Created at', 'created_at')
                 ->sortable()
@@ -100,11 +125,22 @@ final class BookingTable extends PowerGridComponent
     public function actions(Booking $row): array
     {
         return [
-            Button::add('edit')
-                ->slot('Edit: '.$row->id)
+            Button::add('details')
+                ->slot('Details')
                 ->id()
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch('edit', ['rowId' => $row->id])
+                ->class('bg-white text-slate-900 px-3 py-1 rounded-lg hover:bg-slate-900 hover:text-white')
+                ->route('clients.bookings.details', ['id' => $row->id]),
+            Button::add('edit')
+                ->slot('Edit')
+                ->id()
+                ->class('bg-blue-700 px-3 py-1 rounded-lg hover:bg-blue-500')
+                ->dispatch('edit-booking', ['bookingId' => $row->id]),
+            Button::add('delete')
+                ->confirm('Are you sure you want to delete this booking?')
+                ->slot('Delete')
+                ->id()
+                ->class('bg-red-800 rounded-md px-2 py-1 hover:bg-red-600 disabled:cursor-not-allowed')
+                ->dispatch('delete-booking', ['bookingId' => $row->id]),
         ];
     }
 

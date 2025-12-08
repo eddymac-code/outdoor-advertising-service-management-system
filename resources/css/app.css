@@ -1,3 +1,4 @@
+@import 'flatpickr/dist/flatpickr.css';
 @import 'tailwindcss';
 @import '../../vendor/livewire/flux/dist/flux.css';
 @import '../../vendor/wireui/wireui/ts/global.css';

@@ -6,19 +6,21 @@ use function Livewire\Volt\{on, title, protect};
 
 title('Clients');
 
-on(['delete-client' => function ($clientId) {
-    $client = Client::findOrFail($clientId);
+on([
+    'show-success-message' => function ($message) {
+        session()->flash('success', $message);
+    },
+    
+    'delete-client' => function ($clientId) {
+        $client = Client::findOrFail($clientId);
 
-    $client->delete();
+        $client->delete();
 
-    $this->dispatch('pg:eventRefresh-clientTable');
+        $this->dispatch('pg:eventRefresh-clientTable');
 
-    $this->dispatch('show-success-message', 'Client Deleted');
-}]);
-
-on(['show-success-message' => function ($message) {
-    session()->flash('success', $message);
-}]);
+        $this->dispatch('show-success-message', 'Client Deleted');
+    }
+]);
 ?>
 
 <div>

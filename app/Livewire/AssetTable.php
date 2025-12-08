@@ -3,14 +3,15 @@
 namespace App\Livewire;
 
 use App\Models\Asset;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Database\Eloquent\Builder;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
-use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\Rule;
-use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
+use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
+use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 
 final class AssetTable extends PowerGridComponent
@@ -59,19 +60,19 @@ final class AssetTable extends PowerGridComponent
             ->add('status')
             ->add('status_formatted', function ($entry) {
                 if ($entry->status === 'available') {
-                    $stat = \Blade::render(<<<blade
+                    $stat = Blade::render(<<<blade
                                 <x-badge emerald label="Available" />
                             blade);
                 } elseif ($entry->status === 'on_hold') {
-                    $stat = \Blade::render(<<<blade
+                    $stat = Blade::render(<<<blade
                                 <x-badge amber label="On-Hold" />
                             blade);
                 } elseif ($entry->status === 'pre_booked') {
-                    $stat = \Blade::render(<<<blade
+                    $stat = Blade::render(<<<blade
                                 <x-badge fuchsia label="Pre-booked" />
                             blade);
                 } else {
-                    $stat = \Blade::render(<<<blade
+                    $stat = Blade::render(<<<blade
                                 <x-badge negative label="Booked" />
                             blade);
                 }
@@ -133,7 +134,13 @@ final class AssetTable extends PowerGridComponent
                 ->id()
                 // ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
                 ->class('bg-blue-700 px-3 py-1 rounded-lg hover:bg-blue-500')
-                ->dispatch('edit-asset', ['assetId' => $row->id])
+                ->dispatch('edit-asset', ['assetId' => $row->id]),
+            Button::add('delete')
+                ->confirm('Are you sure you want to delete this asset?')
+                ->slot('Delete')
+                ->id()
+                ->class('bg-red-800 rounded-md px-2 py-1 hover:bg-red-600 disabled:cursor-not-allowed')
+                ->dispatch('delete-asset', ['assetId' => $row->id]),
         ];
     }
 

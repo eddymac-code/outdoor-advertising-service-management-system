@@ -1,0 +1,36 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: oasms-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: oasms
+      MYSQL_USER: oasms_admin
+      MYSQL_PASSWORD: oasms_admin_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - oasms-network
+
+  redis:
+    image: redis:alpine
+    container_name: oasms-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - oasms-network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  oasms-network:
+    driver: bridge

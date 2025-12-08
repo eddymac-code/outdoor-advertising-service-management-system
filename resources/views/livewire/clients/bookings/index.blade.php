@@ -1,11 +1,26 @@
 <?php
 
+use App\Models\Booking;
 use Livewire\Volt\Component;
 use function Livewire\Volt\{state, on, mount, title, protect};
 
 title('Bookings');
 
+on([
+    'show-success-message' => function ($message) {
+        session()->flash('success', $message);
+    },
 
+    'delete-booking' => function ($bookingId) {
+        $booking = Booking::findOrFail($bookingId);
+
+        $booking->delete();
+
+        $this->dispatch('pg:eventRefresh-bookingTable');
+
+        $this->dispatch('show-success-message', 'Booking Deleted');
+    }
+]);
 ?>
 
 <div>
@@ -35,6 +50,7 @@ title('Bookings');
 
     <livewire:clients.bookings.booking-form />
 </div>
+
 <script>
     document.addEventListener('closeBookingModal', function name() {
         $closeModal('bookingFormModal'); 

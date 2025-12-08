@@ -19,7 +19,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('clients')->group(function () {
         Volt::route('/', 'clients/index')->name('clients');
-        Volt::route('/bookings', 'clients/bookings/index')->name('clients.bookings');
+        Route::prefix('bookings')->group(function () {
+            Volt::route('/', 'clients/bookings/index')->name('clients.bookings');
+            Volt::route('/{id}/details', 'clients/bookings/details')->name('clients.bookings.details');    
+        });
+        // Volt::route('/bookings', 'clients/bookings/index')->name('clients.bookings');
         Volt::route('/contracts', 'clients/contracts/index')->name('clients.contracts');
     });
 
