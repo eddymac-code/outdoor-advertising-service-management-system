@@ -9,3 +9,7 @@
 CHANGELOG.md export-ignore
 README.md export-ignore
 .github/workflows/browser-tests.yml export-ignore
+
+# Ignore Windows Zone Identifiers
+*:Zone.Identifier filter=strip-ads
+resources/images/* linguist-generated
