@@ -1,8 +1,12 @@
 <?php
 
+use Carbon\Carbon;
 use App\Models\Asset;
 use Livewire\Volt\Component;
-use function Livewire\Volt\{state, rules, mount, on, protect};
+use Illuminate\Support\Facades\Storage;
+use function Livewire\Volt\{state, rules, mount, on, protect, usesFileUploads};
+
+usesFileUploads();
 
 state([
     'assetId' => null,       // null: create, not null: edit
@@ -17,6 +21,10 @@ state([
     'longitude' => '',
     'size' => '',
     'monthly_price' => '',
+    
+    'photo' => null,
+    'existingImage' => null, 
+
     'types' => [
         ['name' => 'Billboard', 'value' => 'billboard'],
         ['name' => 'Jumbotron', 'value' => 'jumbotron'],
@@ -32,6 +40,7 @@ rules([
     'longitude' => 'nullable|string',
     'size' => 'nullable|string',
     'monthly_price' => 'required|numeric',
+    'photo' => 'nullable|image|max:2048',
 ]);
 
 // Load an Asset for editing
@@ -51,6 +60,8 @@ $loadAsset = protect(function ($id) {
     $this->longitude = $asset->longitude;
     $this->size = $asset->size;
     $this->monthly_price = $asset->price_per_month;
+    $this->photo = null;
+    $this->existingImage = $asset->image;
 
     $this->dispatch('openAssetModal');
 });
@@ -67,6 +78,7 @@ $resetForm = protect(function () {
         'longitude',
         'size',
         'monthly_price',
+        'photo',
     ]);
 
     $this->title = "Add Asset";
@@ -84,6 +96,12 @@ on([
 $save = function () {
     $this->validate();
 
+    $imagePath = null;
+
+    if ($this->photo) {
+        $imagePath = $this->photo->store('assets/images', 'public');
+    }
+
     $asset = Asset::create([
         'name' => $this->name,
         'code' => $this->code,
@@ -92,7 +110,8 @@ $save = function () {
         'latitude' => $this->latitude,
         'longitude' => $this->longitude,
         'size' => $this->size,
-        'price_per_month' => $this->monthly_price
+        'price_per_month' => $this->monthly_price,
+        'image' => $imagePath,
     ]);
 
     // Emit event to close modal
@@ -109,6 +128,16 @@ $update = function ($id) {
 
     $this->asset = Asset::findOrFail($id);
 
+    if ($this->photo) {
+        // Delete old image if it exists
+        if ($this->asset->image && Storage::disk('public')->exists($this->asset->image)) {
+            Storage::disk('public')->delete($this->asset->image);
+        }
+
+        // Store new image
+        $this->asset->image = $this->photo->store('assets/images', 'public');
+    }
+
     $this->asset->update([
         'name' => $this->name,
         'code' => $this->code,
@@ -117,7 +146,8 @@ $update = function ($id) {
         'latitude' => $this->latitude,
         'longitude' => $this->longitude,
         'size' => $this->size,
-        'price_per_month' => $this->monthly_price
+        'price_per_month' => $this->monthly_price,
+        'image' => $this->asset->image,
     ]);
 
     // Emit event to close modal
@@ -187,6 +217,30 @@ $update = function ($id) {
                     placeholder="Price" 
                     wire:model="monthly_price"
                 />                
+            </div>
+            <div class="mt-3">
+                {{-- Existing image --}}
+                @if ($existingImage && !$photo)
+                    <x-avatar 
+                        src="{{ Storage::url($existingImage) }}" 
+                        size="2xl" 
+                        rounded="lg" 
+                    />
+                @endif
+
+                {{-- New upload preview --}}
+                @if ($photo)
+                    <x-avatar 
+                        src="{{ $photo->temporaryUrl() }}" 
+                        size="2xl" 
+                        rounded="lg" 
+                    />
+                @endif
+            </div>
+            <div class="mt-3">
+                <input type="file" wire:model="photo" class="bg-emerald-500 text-black p-2 rounded-lg">
+
+                @error('photo') <span class="text-red-500">{{ $message }}</span> @enderror
             </div>
         </div>    
     

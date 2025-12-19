@@ -53,13 +53,8 @@ $monthsAndDays = computed(fn () => $this->end_date ? Carbon::parse($this->end_da
             title="Payments" 
             class="mt-3"
         >
-            
-        </x-card>
-        <x-card class="mt-3">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Repellat, ducimus culpa! Obcaecati, autem. Quis a ratione, aliquam vel corrupti dignissimos.
-        </x-card>
-        <x-card class="mt-3">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo impedit ratione soluta vitae recusandae. Non eligendi aspernatur harum odio sapiente?
+            <x-button label="Add Payment" x-on:click="$dispatch('create-payment')" positive class="my-3" />
+            <livewire:payment-table />
         </x-card>
     </div>
 </div>

@@ -12,7 +12,7 @@ state([
     'clients' => $clients
         ->map( fn($client) => [ 'name' => $client->name, 'value' => $client->id])
         ->toArray(),
-    'assets' => Asset::all()
+    'assets' => Asset::available()->get()
         ->map(fn($asset) => [ 'name' => $asset->name, 'value' => $asset->id, 'price' => $asset->price_per_month])
         ->toArray(),
     'statuses' => [

@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 Schedule::command('assets:expire-on-hold')
     ->everyFifteenMinutes();
+
+Schedule::command('app:cancel-pending-bookings')
+    ->everyFifteenMinutes();
