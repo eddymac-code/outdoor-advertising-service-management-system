@@ -72,7 +72,15 @@
                                     <p class="text-sm text-slate-500">Type: {{ Str::ucwords($asset->type) }} {{ ($asset->size) }}</p>
                                     <p><i class="fa-solid fa-location-dot"></i> {{ $asset->location }}</p>
                                     <p>Price Per Month: {{ $asset->price_per_month }}</p>
-                                    <p>Status: {{ $asset->status }}</p>
+
+                                    <x-badge flat primary label="{{ Str::ucwords($asset->status) }}" class="mt-2">
+                                        <x-slot name="append" class="relative flex items-center w-2 h-2">
+                                            <span
+                                                class="absolute inline-flex w-full h-full rounded-full opacity-75 bg-emerald-500 animate-ping"></span>
+
+                                            <span class="relative inline-flex w-2 h-2 rounded-full bg-emerald-500"></span>
+                                        </x-slot>
+                                    </x-badge>
                                 </div>
                             </div>
                         </div>
